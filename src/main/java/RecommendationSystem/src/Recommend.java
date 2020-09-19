@@ -161,7 +161,7 @@ public class Recommend {
 
     public static void runGenerateCooccurrenceMatrixRowsJob(Configuration conf, Path inputPath, Path outputPath) {
         try {
-            Job cooccurrenceMatrixRowsJob = Job.getInstance(conf, "Consolidate User Preferences");
+            Job cooccurrenceMatrixRowsJob = Job.getInstance(conf, "Generate Cooccurrence Matrix Rows");
             cooccurrenceMatrixRowsJob.setJarByClass(Recommend.class);
             cooccurrenceMatrixRowsJob.setMapperClass(Recommend.generateCooccurrenceMatrixRowsMapper.class);
             cooccurrenceMatrixRowsJob.setCombinerClass(Recommend.generateCooccurrenceMatrixRowsReducer.class);
@@ -182,12 +182,61 @@ public class Recommend {
         }
     }
 
+    public static class generateItemUsersRatingsMapper extends Mapper<Text, Text, Text, Text> {
+        @Override
+        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            String userid = key.toString();
+            String[] itemRatingPairs = value.toString().split(",");
+
+            for (String itemRatingPair: itemRatingPairs) {
+                String item = itemRatingPair.split(":")[0];
+                String rating = itemRatingPair.split(":")[1];
+                context.write(new Text(item), new Text(new Text(String.format("%s:%s", userid, rating))));
+            }
+        }
+    }
+
+    public static class generateItemUsersRatingsReducer extends Reducer<Text, Text, Text, Text> {
+        @Override
+        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            StringJoiner userRatingsBuilder = new StringJoiner(",");
+            for (Text userRatingPair: values) {
+                userRatingsBuilder.add(userRatingPair.toString());
+            }
+            context.write(key, new Text(userRatingsBuilder.toString()));
+        }
+    }
+
+    public static void runGenerateItemUsersRatingsJob(Configuration conf, Path inputPath, Path outputPath) {
+        try {
+            Job generateItemUsersRatingsJob = Job.getInstance(conf, "Generate Item Users Ratings");
+            generateItemUsersRatingsJob.setJarByClass(Recommend.class);
+            generateItemUsersRatingsJob.setMapperClass(Recommend.generateItemUsersRatingsMapper.class);
+            generateItemUsersRatingsJob.setCombinerClass(Recommend.generateItemUsersRatingsReducer.class);
+            generateItemUsersRatingsJob.setReducerClass(Recommend.generateItemUsersRatingsReducer.class);
+            generateItemUsersRatingsJob.setInputFormatClass(KeyValueTextInputFormat.class);
+
+            generateItemUsersRatingsJob.setOutputKeyClass(Text.class);
+            generateItemUsersRatingsJob.setOutputValueClass(Text.class);
+
+            generateItemUsersRatingsJob.setNumReduceTasks(1);
+
+            FileInputFormat.addInputPath(generateItemUsersRatingsJob, inputPath);
+            FileOutputFormat.setOutputPath(generateItemUsersRatingsJob, outputPath);
+            generateItemUsersRatingsJob.waitForCompletion(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String[] args) {
         Path inputPath = new Path(args[0]);
         Path consolidatedUserPrefPath = new Path("intermediateResults//consolidatedUserPref");
         Path cooccurrenceSumPath = new Path("intermediateResults//cooccurrenceSum");
         Path cooccurrenceMatrixRowsPath = new Path("intermediateResults//cooccurrenceMatrixRows");
+        Path itemUsersRatingsPath = new Path("intermediateResults//itemUsersRatingsRows");
         Path outputPath = new Path(args[1]);
         Configuration conf = new Configuration();
 
@@ -203,6 +252,9 @@ public class Recommend {
         Recommend.runGenerateCooccurrenceMatrixRowsJob(conf, cooccurrenceSumPath, cooccurrenceMatrixRowsPath);
         // Output: Key: "item1", Value: "item1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..."
 
+        // Input: Key: userid, Value: item1:rating1,item2:rating2,item3,rating3
+        Recommend.runGenerateItemUsersRatingsJob(conf, consolidatedUserPrefPath, itemUsersRatingsPath);
+        // Output: Key: itemid, Value: userA:ratingA,userB:ratingB,userC,ratingC
 
     }
 }
