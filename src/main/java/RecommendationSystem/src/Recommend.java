@@ -3,13 +3,11 @@ package RecommendationSystem.src;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.StringJoiner;
 
-import TopkCommonWords.TopkCommonWords;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -133,16 +131,63 @@ public class Recommend {
     }
 
 
-
-
     /***************************************************************
      *   PART 2: Predict the recommendation scores for every user
      ***************************************************************/
+
+    public static class generateCooccurrenceMatrixRowsMapper extends Mapper<Text, Text, Text, Text> {
+        @Override
+        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            String itemA = key.toString().split(" ")[0];
+            String itemB = key.toString().split(" ")[1];
+            String count = value.toString();
+
+            context.write(new Text(itemA), new Text(String.format("%s:%s", itemB, count)));
+            context.write(new Text(itemB), new Text(String.format("%s:%s", itemA, count)));
+        }
+    }
+
+    public static class generateCooccurrenceMatrixRowsReducer extends Reducer<Text, Text, Text, Text> {
+        @Override
+        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            StringJoiner itemCountBuilder = new StringJoiner(",");
+            for (Text itemCountPair: values) {
+                itemCountBuilder.add(itemCountPair.toString());
+            }
+            context.write(key, new Text(itemCountBuilder.toString()));
+        }
+    }
+
+
+    public static void runGenerateCooccurrenceMatrixRowsJob(Configuration conf, Path inputPath, Path outputPath) {
+        try {
+            Job cooccurrenceMatrixRowsJob = Job.getInstance(conf, "Consolidate User Preferences");
+            cooccurrenceMatrixRowsJob.setJarByClass(Recommend.class);
+            cooccurrenceMatrixRowsJob.setMapperClass(Recommend.generateCooccurrenceMatrixRowsMapper.class);
+            cooccurrenceMatrixRowsJob.setCombinerClass(Recommend.generateCooccurrenceMatrixRowsReducer.class);
+            cooccurrenceMatrixRowsJob.setReducerClass(Recommend.generateCooccurrenceMatrixRowsReducer.class);
+            cooccurrenceMatrixRowsJob.setInputFormatClass(KeyValueTextInputFormat.class);
+
+            cooccurrenceMatrixRowsJob.setOutputKeyClass(Text.class);
+            cooccurrenceMatrixRowsJob.setOutputValueClass(Text.class);
+
+            cooccurrenceMatrixRowsJob.setNumReduceTasks(1);
+
+            FileInputFormat.addInputPath(cooccurrenceMatrixRowsJob, inputPath);
+            FileOutputFormat.setOutputPath(cooccurrenceMatrixRowsJob, outputPath);
+            cooccurrenceMatrixRowsJob.waitForCompletion(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String[] args) {
         Path inputPath = new Path(args[0]);
         Path consolidatedUserPrefPath = new Path("intermediateResults//consolidatedUserPref");
         Path cooccurrenceSumPath = new Path("intermediateResults//cooccurrenceSum");
+        Path cooccurrenceMatrixRowsPath = new Path("intermediateResults//cooccurrenceMatrixRows");
         Path outputPath = new Path(args[1]);
         Configuration conf = new Configuration();
 
@@ -153,5 +198,11 @@ public class Recommend {
         // Input: Key: userid, Value: item1:rating1,item2:rating2,item3,rating3
         Recommend.runCooccurrenceSumJob(conf, consolidatedUserPrefPath, cooccurrenceSumPath);
         // Output: Key: "item1 item2", Value: <Co-occurrence Count>
+
+        // Input: Key: "item1 item2", Value: <Co-occurrence Count>
+        Recommend.runGenerateCooccurrenceMatrixRowsJob(conf, cooccurrenceSumPath, cooccurrenceMatrixRowsPath);
+        // Output: Key: "item1", Value: "item1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..."
+
+
     }
 }
