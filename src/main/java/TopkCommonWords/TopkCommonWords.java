@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -68,7 +70,6 @@ public class TopkCommonWords {
     public static class MultiInputMapper extends Mapper<Text, Text, Text, Text> {
         @Override
         protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-            // super.map(key, value, context);
             context.write(key, value);
         }
     }
@@ -93,20 +94,31 @@ public class TopkCommonWords {
         }
     }
 
+    public static class TruncateAndSortMapper extends Mapper<Text, Text, IntWritable, Text> {
+        @Override
+        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            context.write(new IntWritable(-1 * Integer.parseInt(key.toString())), value);
+        }
+    }
+
     public static class TruncateAndSortReducer extends Reducer<IntWritable, Text, IntWritable, Text> {
-        private IntWritable countSoFar = new IntWritable();
+        private int countSoFar = 0;
         private int K;
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
-            this.K = conf.getInt("K");
+            this.K = conf.getInt("K", 20);
         }
 
         @Override
         public void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-
-
+            Iterator<Text> wordsIterator = values.iterator();
+            while (this.countSoFar < this.K && wordsIterator.hasNext()) {
+                Text word = wordsIterator.next();
+                context.write(new IntWritable(-1 * key.get()), word);
+                this.countSoFar += 1;
+            }
         }
     }
 
@@ -133,9 +145,9 @@ public class TopkCommonWords {
         Path inputFile2 = new Path(args[1]);
         Path stopWordsFile = new Path(args[2]);
         Path outputFile = new Path(args[3]);
-        Path wordCountsFile1 = new Path("intermediate_results//file1");
-        Path wordCountsFile2 = new Path("intermediate_results//file2");
-        Path combinedCountsFile = new Path("intermediate_results//combined");
+        Path wordCountsFile1 = new Path("intermediateResults//file1");
+        Path wordCountsFile2 = new Path("intermediateResults//file2");
+        Path combinedCountsFile = new Path("intermediateResults//combined");
 
         System.out.println("Setting up jobs");
         Configuration conf = new Configuration();
@@ -180,6 +192,25 @@ public class TopkCommonWords {
 
             FileOutputFormat.setOutputPath(combineWordCountsJob, combinedCountsFile);
             combineWordCountsJob.waitForCompletion(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Job truncateAndSortJob = Job.getInstance(conf, "Truncate and Sort Output");
+            truncateAndSortJob.setJarByClass(TopkCommonWords.class);
+            truncateAndSortJob.setInputFormatClass(KeyValueTextInputFormat.class);
+            truncateAndSortJob.setMapperClass(TruncateAndSortMapper.class);
+//            truncateAndSortJob.setSortComparatorClass(ReverseComparator.class);
+            truncateAndSortJob.setReducerClass(TruncateAndSortReducer.class);
+            truncateAndSortJob.setOutputKeyClass(IntWritable.class);
+            truncateAndSortJob.setOutputValueClass(Text.class);
+            truncateAndSortJob.setMapOutputKeyClass(IntWritable.class);
+            truncateAndSortJob.setMapOutputValueClass(Text.class);
+            truncateAndSortJob.setNumReduceTasks(1);
+            FileInputFormat.addInputPath(truncateAndSortJob, combinedCountsFile);
+            FileOutputFormat.setOutputPath(truncateAndSortJob, outputFile);
+            System.exit(truncateAndSortJob.waitForCompletion(true) ? 0 : 1);
         } catch (Exception e) {
             e.printStackTrace();
         }
