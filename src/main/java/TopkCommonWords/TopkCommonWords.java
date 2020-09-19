@@ -12,8 +12,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -27,8 +25,7 @@ public class TopkCommonWords {
         HashSet<String> stopWords = new HashSet<>();
 
         @Override
-        public void setup(Context context) throws IOException, InterruptedException {
-            // super.setup(context);
+        public void setup(Context context) throws IOException {
             Configuration conf = context.getConfiguration();
             FileSystem fileSystem = FileSystem.get(conf);
             Path stopWordsFilePath = new Path(conf.get("stopWordsFile"));
@@ -46,9 +43,9 @@ public class TopkCommonWords {
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             // super.map(key, value, context);
-            String[] words =value.toString().split(" ");
+            String[] words = value.toString().split(" ");
 
-            for (String word: words) {
+            for (String word : words) {
                 if (!this.stopWords.contains((word))) {
                     context.write(new Text(word), new IntWritable(1));
                 }
@@ -60,7 +57,7 @@ public class TopkCommonWords {
         @Override
         public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int totalCount = 0;
-            for(IntWritable count : values) {
+            for (IntWritable count : values) {
                 totalCount += count.get();
             }
             context.write(key, new IntWritable(totalCount));
@@ -79,7 +76,7 @@ public class TopkCommonWords {
         protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException, UnsupportedOperationException {
             ArrayList<Integer> valuesList = new ArrayList<>();
 
-            for (Text value: values) {
+            for (Text value : values) {
                 valuesList.add(Integer.valueOf(value.toString()));
             }
 
@@ -158,7 +155,7 @@ public class TopkCommonWords {
         // Count Words in First File
         try {
             Job countFirstFileWordsJob = TopkCommonWords.createWordCountJob(inputFile1,
-                    wordCountsFile1, conf,"Count Words in First File");
+                    wordCountsFile1, conf, "Count Words in First File");
             countFirstFileWordsJob.waitForCompletion(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -201,7 +198,6 @@ public class TopkCommonWords {
             truncateAndSortJob.setJarByClass(TopkCommonWords.class);
             truncateAndSortJob.setInputFormatClass(KeyValueTextInputFormat.class);
             truncateAndSortJob.setMapperClass(TruncateAndSortMapper.class);
-//            truncateAndSortJob.setSortComparatorClass(ReverseComparator.class);
             truncateAndSortJob.setReducerClass(TruncateAndSortReducer.class);
             truncateAndSortJob.setOutputKeyClass(IntWritable.class);
             truncateAndSortJob.setOutputValueClass(Text.class);
