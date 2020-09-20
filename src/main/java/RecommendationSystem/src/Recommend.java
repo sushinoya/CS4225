@@ -298,7 +298,7 @@ public class Recommend {
                     String userID = userScore.split(":")[0];
                     Double userItemScore = Double.parseDouble(userScore.split(":")[1]);
 
-                    Text newKey = new Text(String.format("%s %s", userID, rowItemID));
+                    Text newKey = new Text(String.format("%s\t%s", userID, rowItemID));
                     DoubleWritable newValue = new DoubleWritable(cooccurrenceCount * userItemScore);
                     context.write(newKey, newValue);
                 }
@@ -345,9 +345,38 @@ public class Recommend {
             String[] userIdAndItemId = key.toString().split(" ");
             String userID = userIdAndItemId[0];
             String itemID = userIdAndItemId[1];
-            String reccomendationScore = value.toString();
+            String recommendationScore = value.toString();
 
-            context.write(new Text(userID), new Text(String.format("%s,%s", itemID, reccomendationScore)));
+            context.write(new Text(userID), new Text(String.format("%s,%s", itemID, recommendationScore)));
+        }
+    }
+
+    public static class FormatOutputReducer extends Reducer<Text, Text, Text, Text> {
+        @Override
+        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            context.write(key, values.iterator().next());
+        }
+    }
+
+    public static void runFormatOutputJob(Configuration conf, Path inputPath, Path outputPath) {
+        try {
+            Job formatOutputJob = Job.getInstance(conf, "Format Output");
+            formatOutputJob.setJarByClass(Recommend.class);
+            formatOutputJob.setMapperClass(Recommend.FormatOutputMapper.class);
+            formatOutputJob.setReducerClass(Recommend.FormatOutputReducer.class);
+            formatOutputJob.setInputFormatClass(KeyValueTextInputFormat.class);
+
+            formatOutputJob.setOutputKeyClass(Text.class);
+            formatOutputJob.setOutputValueClass(Text.class);
+
+            formatOutputJob.setNumReduceTasks(1);
+
+            FileInputFormat.addInputPath(formatOutputJob, inputPath);
+            FileOutputFormat.setOutputPath(formatOutputJob, outputPath);
+            formatOutputJob.waitForCompletion(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -383,10 +412,18 @@ public class Recommend {
         Recommend.runCombineUserRatingsAndMatrixRows(conf, cooccurrenceMatrixRowsPath, itemUsersRatingsPath, userRatingsAndMatrixRowsPath);
         // Output: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB&IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC
 
+
+        // Change delimiter to commas for final output
+        Configuration outputConf = new Configuration();
+        outputConf.set("mapred.textoutputformat.separator", ",");
+
         // Input: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB&IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC"
-        Recommend.runMultiplyRowByRow(conf, userRatingsAndMatrixRowsPath, userRecommendationScoresPath);
+        Recommend.runMultiplyRowByRow(outputConf, userRatingsAndMatrixRowsPath, outputPath);
         // Output: Key: "userid itemid", Value: score
 
+        // Input: Key: "userid itemid", Value: score
+//        Recommend.runFormatOutputJob(conf, userRecommendationScoresPath, outputPath);
+        // Output: Key: userid, Value: itemid, score
 
     }
 }
