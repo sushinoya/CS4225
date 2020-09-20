@@ -282,13 +282,18 @@ public class Recommend {
 
     // The cooccurrence matrix is symmetrical along its diagonal. This allows us to do row by row matrix multiplication
 
-    public static class RowMultiplierMapper extends Mapper<Text, Text, Text, DoubleWritable> {
+    public static class RowMultiplierMapper extends Mapper<Text, Text, Text, Text> {
         @Override
         protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
             String itemID = key.toString();
             String[] matrixRowAndUserScores = value.toString().split("&");
             String userScores = matrixRowAndUserScores[0].replace("IUR", "");
             String matrixRow = matrixRowAndUserScores[1].replace("CMR", "");
+
+            for (String userScore : userScores.split(",")) {
+                String userID = userScore.split(":")[0];
+                context.write(new Text(String.format("%s\t%s", userID, itemID)), new Text("<SKIP>"));
+            }
 
             for (String rowElem: matrixRow.split(",")) {
                 String rowItemID = rowElem.split(":")[0];
@@ -299,21 +304,26 @@ public class Recommend {
                     Double userItemScore = Double.parseDouble(userScore.split(":")[1]);
 
                     Text newKey = new Text(String.format("%s\t%s", userID, rowItemID));
-                    DoubleWritable newValue = new DoubleWritable(cooccurrenceCount * userItemScore);
+                    Text newValue = new Text(String.format("%f", cooccurrenceCount * userItemScore));
                     context.write(newKey, newValue);
                 }
             }
         }
     }
 
-    public static class RowMultiplierReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+    public static class RowMultiplierReducer extends Reducer<Text, Text, Text, Text> {
         @Override
-        protected void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
+        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             double matrix_cell_sum = 0.0;
-            for (DoubleWritable product: values) {
-                matrix_cell_sum += product.get();
+            for (Text product: values) {
+                if (product.toString().equals("<SKIP>")) {
+                    return;
+                }
+
+                matrix_cell_sum += Double.parseDouble(product.toString());
             }
-            context.write(key, new DoubleWritable(matrix_cell_sum));
+
+            context.write(key, new Text(String.valueOf(matrix_cell_sum)));
         }
     }
 
@@ -326,7 +336,7 @@ public class Recommend {
             multiplyRowByRowJob.setInputFormatClass(KeyValueTextInputFormat.class);
 
             multiplyRowByRowJob.setOutputKeyClass(Text.class);
-            multiplyRowByRowJob.setOutputValueClass(DoubleWritable.class);
+            multiplyRowByRowJob.setOutputValueClass(Text.class);
 
             multiplyRowByRowJob.setNumReduceTasks(1);
 
