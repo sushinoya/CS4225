@@ -1,18 +1,12 @@
 package RecommendationSystem.src;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 
-import TopkCommonWords.TopkCommonWords;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -281,7 +275,6 @@ public class Recommend {
     }
 
     // The cooccurrence matrix is symmetrical along its diagonal. This allows us to do row by row matrix multiplication
-
     public static class RowMultiplierMapper extends Mapper<Text, Text, Text, Text> {
         @Override
         protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
@@ -349,47 +342,6 @@ public class Recommend {
     }
 
 
-    public static class FormatOutputMapper extends Mapper<Text, Text, Text, Text> {
-        @Override
-        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-            String[] userIdAndItemId = key.toString().split(" ");
-            String userID = userIdAndItemId[0];
-            String itemID = userIdAndItemId[1];
-            String recommendationScore = value.toString();
-
-            context.write(new Text(userID), new Text(String.format("%s,%s", itemID, recommendationScore)));
-        }
-    }
-
-    public static class FormatOutputReducer extends Reducer<Text, Text, Text, Text> {
-        @Override
-        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-            context.write(key, values.iterator().next());
-        }
-    }
-
-    public static void runFormatOutputJob(Configuration conf, Path inputPath, Path outputPath) {
-        try {
-            Job formatOutputJob = Job.getInstance(conf, "Format Output");
-            formatOutputJob.setJarByClass(Recommend.class);
-            formatOutputJob.setMapperClass(Recommend.FormatOutputMapper.class);
-            formatOutputJob.setReducerClass(Recommend.FormatOutputReducer.class);
-            formatOutputJob.setInputFormatClass(KeyValueTextInputFormat.class);
-
-            formatOutputJob.setOutputKeyClass(Text.class);
-            formatOutputJob.setOutputValueClass(Text.class);
-
-            formatOutputJob.setNumReduceTasks(1);
-
-            FileInputFormat.addInputPath(formatOutputJob, inputPath);
-            FileOutputFormat.setOutputPath(formatOutputJob, outputPath);
-            formatOutputJob.waitForCompletion(true);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void main(String[] args) {
         Path inputPath = new Path(args[0]);
         Path consolidatedUserPrefPath = new Path("intermediateResults//consolidatedUserPref");
@@ -397,7 +349,6 @@ public class Recommend {
         Path cooccurrenceMatrixRowsPath = new Path("intermediateResults//cooccurrenceMatrixRows");
         Path itemUsersRatingsPath = new Path("intermediateResults//itemUsersRatingsRows");
         Path userRatingsAndMatrixRowsPath = new Path("intermediateResults//userRatingsAndMatrixRows");
-        Path userRecommendationScoresPath = new Path("intermediateResults//userRecommendationScores");
         Path outputPath = new Path(args[1]);
         Configuration conf = new Configuration();
 
@@ -430,10 +381,5 @@ public class Recommend {
         // Input: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB&IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC"
         Recommend.runMultiplyRowByRow(outputConf, userRatingsAndMatrixRowsPath, outputPath);
         // Output: Key: "userid itemid", Value: score
-
-        // Input: Key: "userid itemid", Value: score
-//        Recommend.runFormatOutputJob(conf, userRecommendationScoresPath, outputPath);
-        // Output: Key: userid, Value: itemid, score
-
     }
 }
