@@ -3,16 +3,16 @@ package RecommendationSystem.src;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.StringJoiner;
+import java.util.*;
 
+import TopkCommonWords.TopkCommonWords;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -229,6 +229,118 @@ public class Recommend {
         }
     }
 
+    public static class MultiInputMapper extends Mapper<Text, Text, Text, Text> {
+        @Override
+        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            context.write(key, value);
+        }
+    }
+
+    public static class CombineUserRatingsAndMatrixRowsReducer extends Reducer<Text, Text, Text, Text> {
+        @Override
+        protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException, UnsupportedOperationException {
+            String itemUserRatings = null;
+            String cooccurrenceMatrixRow = null;
+            for (Text value: values) {
+                String stringValue = value.toString();
+                if (stringValue.startsWith("IUR")) {
+                    itemUserRatings = stringValue;
+                } else if (stringValue.startsWith("CMR")) {
+                    cooccurrenceMatrixRow = stringValue;
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+            assert(itemUserRatings != null && cooccurrenceMatrixRow != null); // Sanity check
+            context.write(key, new Text(String.format("%s+%s", itemUserRatings, cooccurrenceMatrixRow)));
+        }
+    }
+
+    public static void runCombineUserRatingsAndMatrixRows(Configuration conf, Path inputA, Path inputB, Path output) {
+        try {
+            Job combineRatingsAndRowsJob = Job.getInstance(conf, "Combine User Ratings And Matrix Rows");
+            combineRatingsAndRowsJob.setJarByClass(Recommend.class);
+
+            combineRatingsAndRowsJob.setReducerClass(Recommend.CombineUserRatingsAndMatrixRowsReducer.class);
+
+            MultipleInputs.addInputPath(combineRatingsAndRowsJob, inputA, KeyValueTextInputFormat.class, Recommend.MultiInputMapper.class);
+            MultipleInputs.addInputPath(combineRatingsAndRowsJob, inputB, KeyValueTextInputFormat.class, Recommend.MultiInputMapper.class);
+            FileOutputFormat.setOutputPath(combineRatingsAndRowsJob, output);
+
+            combineRatingsAndRowsJob.setMapOutputKeyClass(Text.class);
+            combineRatingsAndRowsJob.setMapOutputValueClass(Text.class);
+
+            combineRatingsAndRowsJob.setOutputKeyClass(Text.class);
+            combineRatingsAndRowsJob.setOutputValueClass(Text.class);
+
+            combineRatingsAndRowsJob.setNumReduceTasks(1);
+            combineRatingsAndRowsJob.waitForCompletion(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // The cooccurrence matrix is symmetrical along its diagonal. This allows us to do row by row matrix multiplication
+
+    public static class RowMultiplierMapper extends Mapper<Text, Text, Text, DoubleWritable> {
+        @Override
+        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            String itemID = key.toString();
+            String[] matrixRowAndUserScores = value.toString().split("/+");
+            String matrixRow = matrixRowAndUserScores[0].replace("CMR", "");
+            String userScores = matrixRowAndUserScores[1].replace("IUR", "");
+
+            for (String rowElem: matrixRow.split(",")) {
+                String rowItemID = rowElem.split(":")[0];
+                Integer cooccurrenceCount = Integer.parseInt(rowElem.split(":")[1]);
+
+                for (String userScore : userScores.split(",")) {
+                    String userID = userScore.split(":")[0];
+                    Double userItemScore = Double.parseDouble(userScore.split(":")[1]);
+
+                    Text newKey = new Text(String.format("%s %s", userID, itemID));
+                    DoubleWritable newValue = new DoubleWritable(cooccurrenceCount * userItemScore);
+                    context.write(newKey, newValue);
+                }
+            }
+        }
+    }
+
+    public static class RowMultiplierReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+        @Override
+        protected void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
+            double matrix_cell_sum = 0.0;
+            for (DoubleWritable product: values) {
+                matrix_cell_sum += product.get();
+            }
+            context.write(key, new DoubleWritable(matrix_cell_sum));
+        }
+    }
+
+    public static void runMultiplyRowByRow(Configuration conf, Path input, Path output) {
+        try {
+            Job multiplyRowByRowJob = Job.getInstance(conf, "Multiply Row By Row Job");
+            multiplyRowByRowJob.setJarByClass(Recommend.class);
+
+            multiplyRowByRowJob.setMapperClass(Recommend.RowMultiplierMapper.class);
+            multiplyRowByRowJob.setReducerClass(Recommend.RowMultiplierReducer.class);
+
+            FileInputFormat.addInputPath(multiplyRowByRowJob, input);
+            FileOutputFormat.setOutputPath(multiplyRowByRowJob, output);
+
+            multiplyRowByRowJob.setMapOutputKeyClass(Text.class);
+            multiplyRowByRowJob.setMapOutputValueClass(DoubleWritable.class);
+
+            multiplyRowByRowJob.setOutputKeyClass(Text.class);
+            multiplyRowByRowJob.setOutputValueClass(DoubleWritable.class);
+
+            multiplyRowByRowJob.setNumReduceTasks(1);
+            multiplyRowByRowJob.waitForCompletion(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String[] args) {
         Path inputPath = new Path(args[0]);
@@ -236,6 +348,8 @@ public class Recommend {
         Path cooccurrenceSumPath = new Path("intermediateResults//cooccurrenceSum");
         Path cooccurrenceMatrixRowsPath = new Path("intermediateResults//cooccurrenceMatrixRows");
         Path itemUsersRatingsPath = new Path("intermediateResults//itemUsersRatingsRows");
+        Path userRatingsAndMatrixRowsPath = new Path("intermediateResults//userRatingsAndMatrixRows");
+        Path userRecommendationScoresPath = new Path("intermediateResults//userRecommendationScores");
         Path outputPath = new Path(args[1]);
         Configuration conf = new Configuration();
 
@@ -257,7 +371,13 @@ public class Recommend {
 
         // Input: Key: "item1", Value: "CMRitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..."
         // Input: Key: itemid, Value: "IURuserA:ratingA,userB:ratingB,userC,ratingC"
-        // Output: Key: item1, Value: "userA:ratingA+item1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC
+        Recommend.runCombineUserRatingsAndMatrixRows(conf, cooccurrenceMatrixRowsPath, itemUsersRatingsPath, userRatingsAndMatrixRowsPath);
+        // Output: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB+IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC
+
+        // Input: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB+IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC"
+        Recommend.runMultiplyRowByRow(conf, userRatingsAndMatrixRowsPath, userRecommendationScoresPath);
+        // Output: Key: "userid itemid", Value: score
+
 
     }
 }
