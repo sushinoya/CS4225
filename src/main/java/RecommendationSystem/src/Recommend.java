@@ -252,7 +252,7 @@ public class Recommend {
                 }
             }
             assert(itemUserRatings != null && cooccurrenceMatrixRow != null); // Sanity check
-            context.write(key, new Text(String.format("%s+%s", itemUserRatings, cooccurrenceMatrixRow)));
+            context.write(key, new Text(String.format("%s&%s", itemUserRatings, cooccurrenceMatrixRow)));
         }
     }
 
@@ -286,9 +286,9 @@ public class Recommend {
         @Override
         protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
             String itemID = key.toString();
-            String[] matrixRowAndUserScores = value.toString().split("/+");
-            String matrixRow = matrixRowAndUserScores[0].replace("CMR", "");
-            String userScores = matrixRowAndUserScores[1].replace("IUR", "");
+            String[] matrixRowAndUserScores = value.toString().split("&");
+            String userScores = matrixRowAndUserScores[0].replace("IUR", "");
+            String matrixRow = matrixRowAndUserScores[1].replace("CMR", "");
 
             for (String rowElem: matrixRow.split(",")) {
                 String rowItemID = rowElem.split(":")[0];
@@ -298,7 +298,7 @@ public class Recommend {
                     String userID = userScore.split(":")[0];
                     Double userItemScore = Double.parseDouble(userScore.split(":")[1]);
 
-                    Text newKey = new Text(String.format("%s %s", userID, itemID));
+                    Text newKey = new Text(String.format("%s %s", userID, rowItemID));
                     DoubleWritable newValue = new DoubleWritable(cooccurrenceCount * userItemScore);
                     context.write(newKey, newValue);
                 }
@@ -321,26 +321,35 @@ public class Recommend {
         try {
             Job multiplyRowByRowJob = Job.getInstance(conf, "Multiply Row By Row Job");
             multiplyRowByRowJob.setJarByClass(Recommend.class);
-
             multiplyRowByRowJob.setMapperClass(Recommend.RowMultiplierMapper.class);
             multiplyRowByRowJob.setReducerClass(Recommend.RowMultiplierReducer.class);
-
-            FileInputFormat.addInputPath(multiplyRowByRowJob, input);
-            FileOutputFormat.setOutputPath(multiplyRowByRowJob, output);
-
-            multiplyRowByRowJob.setMapOutputKeyClass(Text.class);
-            multiplyRowByRowJob.setMapOutputValueClass(DoubleWritable.class);
+            multiplyRowByRowJob.setInputFormatClass(KeyValueTextInputFormat.class);
 
             multiplyRowByRowJob.setOutputKeyClass(Text.class);
             multiplyRowByRowJob.setOutputValueClass(DoubleWritable.class);
 
             multiplyRowByRowJob.setNumReduceTasks(1);
+
+            FileInputFormat.addInputPath(multiplyRowByRowJob, input);
+            FileOutputFormat.setOutputPath(multiplyRowByRowJob, output);
             multiplyRowByRowJob.waitForCompletion(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+
+    public static class FormatOutputMapper extends Mapper<Text, Text, Text, Text> {
+        @Override
+        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            String[] userIdAndItemId = key.toString().split(" ");
+            String userID = userIdAndItemId[0];
+            String itemID = userIdAndItemId[1];
+            String reccomendationScore = value.toString();
+
+            context.write(new Text(userID), new Text(String.format("%s,%s", itemID, reccomendationScore)));
+        }
+    }
 
     public static void main(String[] args) {
         Path inputPath = new Path(args[0]);
@@ -372,9 +381,9 @@ public class Recommend {
         // Input: Key: "item1", Value: "CMRitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..."
         // Input: Key: itemid, Value: "IURuserA:ratingA,userB:ratingB,userC,ratingC"
         Recommend.runCombineUserRatingsAndMatrixRows(conf, cooccurrenceMatrixRowsPath, itemUsersRatingsPath, userRatingsAndMatrixRowsPath);
-        // Output: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB+IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC
+        // Output: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB&IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC
 
-        // Input: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB+IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC"
+        // Input: Key: item1, Value: "CMRuserA:ratingA,userB:ratingB&IURitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC"
         Recommend.runMultiplyRowByRow(conf, userRatingsAndMatrixRowsPath, userRecommendationScoresPath);
         // Output: Key: "userid itemid", Value: score
 
