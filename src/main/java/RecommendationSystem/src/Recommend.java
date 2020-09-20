@@ -154,7 +154,8 @@ public class Recommend {
             for (Text itemCountPair: values) {
                 itemCountBuilder.add(itemCountPair.toString());
             }
-            context.write(key, new Text(itemCountBuilder.toString()));
+
+            context.write(key, new Text("CMR" + itemCountBuilder.toString()));
         }
     }
 
@@ -164,7 +165,6 @@ public class Recommend {
             Job cooccurrenceMatrixRowsJob = Job.getInstance(conf, "Generate Cooccurrence Matrix Rows");
             cooccurrenceMatrixRowsJob.setJarByClass(Recommend.class);
             cooccurrenceMatrixRowsJob.setMapperClass(Recommend.generateCooccurrenceMatrixRowsMapper.class);
-            cooccurrenceMatrixRowsJob.setCombinerClass(Recommend.generateCooccurrenceMatrixRowsReducer.class);
             cooccurrenceMatrixRowsJob.setReducerClass(Recommend.generateCooccurrenceMatrixRowsReducer.class);
             cooccurrenceMatrixRowsJob.setInputFormatClass(KeyValueTextInputFormat.class);
 
@@ -203,7 +203,7 @@ public class Recommend {
             for (Text userRatingPair: values) {
                 userRatingsBuilder.add(userRatingPair.toString());
             }
-            context.write(key, new Text(userRatingsBuilder.toString()));
+            context.write(key, new Text("IUR" + userRatingsBuilder.toString()));
         }
     }
 
@@ -212,7 +212,6 @@ public class Recommend {
             Job generateItemUsersRatingsJob = Job.getInstance(conf, "Generate Item Users Ratings");
             generateItemUsersRatingsJob.setJarByClass(Recommend.class);
             generateItemUsersRatingsJob.setMapperClass(Recommend.generateItemUsersRatingsMapper.class);
-            generateItemUsersRatingsJob.setCombinerClass(Recommend.generateItemUsersRatingsReducer.class);
             generateItemUsersRatingsJob.setReducerClass(Recommend.generateItemUsersRatingsReducer.class);
             generateItemUsersRatingsJob.setInputFormatClass(KeyValueTextInputFormat.class);
 
@@ -250,11 +249,15 @@ public class Recommend {
 
         // Input: Key: "item1 item2", Value: <Co-occurrence Count>
         Recommend.runGenerateCooccurrenceMatrixRowsJob(conf, cooccurrenceSumPath, cooccurrenceMatrixRowsPath);
-        // Output: Key: "item1", Value: "item1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..."
+        // Output: Key: "item1", Value: "CMRitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..."
 
         // Input: Key: userid, Value: item1:rating1,item2:rating2,item3,rating3
         Recommend.runGenerateItemUsersRatingsJob(conf, consolidatedUserPrefPath, itemUsersRatingsPath);
-        // Output: Key: itemid, Value: userA:ratingA,userB:ratingB,userC,ratingC
+        // Output: Key: itemid, Value: "IURuserA:ratingA,userB:ratingB,userC,ratingC"
+
+        // Input: Key: "item1", Value: "CMRitem1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..."
+        // Input: Key: itemid, Value: "IURuserA:ratingA,userB:ratingB,userC,ratingC"
+        // Output: Key: item1, Value: "userA:ratingA+item1:<item1&1 cooccurrence count>,item2:<item1&2 cooccurrence count>..." ,userB:ratingB,userC,ratingC
 
     }
 }
