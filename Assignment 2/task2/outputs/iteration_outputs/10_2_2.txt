@@ -1,0 +1,121 @@
+Silhouette = 0.4798696971194018
+
+====== Results for Cluster 0 ======
+Cluster Center: (-0.2466356184471508, 0.21274463217269657)
+Cluster Size: 182005
+Top 5 tokens:
+Token          Frequency
+going          13971
+day            13131
+work           12651
+just           11998
+i'm            11553
+======================
+
+====== Results for Cluster 1 ======
+Cluster Center: (0.33209378038390663, 0.236271684089523)
+Cluster Size: 221818
+Top 5 tokens:
+Token          Frequency
+u              20064
+love           19509
+know           16355
+just           14948
+don't          13980
+======================
+
+====== Results for Cluster 2 ======
+Cluster Center: (-0.4901360767633109, 0.2114796585665512)
+Cluster Size: 54605
+Top 5 tokens:
+Token          Frequency
+work           5001
+going          3644
+ready          3324
+home           3041
+getting        2425
+======================
+
+====== Results for Cluster 3 ======
+Cluster Center: (0.1807927180796158, 0.22470978057519905)
+Cluster Size: 364714
+Top 5 tokens:
+Token          Frequency
+i'm            32751
+just           31808
+like           24777
+-              21035
+love           18669
+======================
+
+====== Results for Cluster 4 ======
+Cluster Center: (1.5778463651153356, -2.1231043254497552)
+Cluster Size: 1653
+Top 5 tokens:
+Token          Frequency
+followers      1533
+train          1519
+add            1508
+100            1503
+pay            1494
+======================
+
+====== Results for Cluster 5 ======
+Cluster Center: (-0.08598917242780706, 0.21513283545681847)
+Cluster Size: 311556
+Top 5 tokens:
+Token          Frequency
+i'm            28980
+just           27544
+going          19226
+good           19119
+day            17981
+======================
+
+====== Results for Cluster 6 ======
+Cluster Center: (0.04867512903061018, 0.20548268453633833)
+Cluster Size: 389577
+Top 5 tokens:
+Token          Frequency
+i'm            37617
+just           34336
+good           22768
+like           20148
+it's           18805
+======================
+
+====== Results for Cluster 7 ======
+Cluster Center: (0.5633515907450677, 0.26918571441507394)
+Cluster Size: 58267
+Top 5 tokens:
+Token          Frequency
+thanks         6173
+love           5995
+thank          5863
+u              5777
+follow         4260
+======================
+
+====== Results for Cluster 8 ======
+Cluster Center: (2.310838374220719, 0.4200405751389423)
+Cluster Size: 1050
+Top 5 tokens:
+Token          Frequency
+#seb-day       488
+???            425
+????           396
+??             392
+?????          354
+======================
+
+====== Results for Cluster 9 ======
+Cluster Center: (0.32911544309370017, -0.12202783341216025)
+Cluster Size: 14755
+Top 5 tokens:
+Token          Frequency
+followers      2541
+using          2105
+add            1901
+pay            1840
+train          1494
+======================

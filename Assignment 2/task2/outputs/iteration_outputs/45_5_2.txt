@@ -1,0 +1,541 @@
+Silhouette = 0.2084120624148785
+
+====== Results for Cluster 0 ======
+Cluster Center: (-0.08047525160464258, 0.06646656942317716, -0.051667101514995525, 0.23254862286956887, 0.3902673782020185)
+Cluster Size: 24415
+Top 5 tokens:
+Token          Frequency
+just           2517
+iphone         2291
+new            1333
+phone          1097
+got            1026
+======================
+
+====== Results for Cluster 1 ======
+Cluster Center: (-0.043589869826208404, 0.4051765562195167, -0.12365210130487161, 0.32150637542404903, -0.10717678579215512)
+Cluster Size: 31270
+Top 5 tokens:
+Token          Frequency
+u              8231
+follow         3659
+know           2822
+love           2716
+twitter        2138
+======================
+
+====== Results for Cluster 2 ======
+Cluster Center: (-0.17883486077500868, -0.062185162477619, 0.2501703619711808, 0.18088086966835595, -0.20172825640477823)
+Cluster Size: 39666
+Top 5 tokens:
+Token          Frequency
+good           7298
+it's           3621
+morning        3616
+night          3058
+today          3043
+======================
+
+====== Results for Cluster 3 ======
+Cluster Center: (1.5626065591042446, -0.9234862843932642, -1.0764756521875147, 2.1518089474240516, 1.1898232909702242)
+Cluster Size: 1565
+Top 5 tokens:
+Token          Frequency
+followers      1526
+train          1506
+100            1496
+pay            1489
+day            1487
+======================
+
+====== Results for Cluster 4 ======
+Cluster Center: (-0.03833214407129663, 0.03445010504636368, 0.2055172722462102, 0.2754721084877669, -0.06839271725379867)
+Cluster Size: 65866
+Top 5 tokens:
+Token          Frequency
+i'm            7940
+day            7168
+going          6523
+just           5829
+got            4144
+======================
+
+====== Results for Cluster 5 ======
+Cluster Center: (0.014550039368243171, 0.2499941105268294, 0.10037804558483059, 0.27237502656056245, -0.12790673203265862)
+Cluster Size: 54548
+Top 5 tokens:
+Token          Frequency
+u              10087
+can't          6556
+i'm            5960
+miss           5591
+im             5063
+======================
+
+====== Results for Cluster 6 ======
+Cluster Center: (-0.632069180536567, -0.4213667393910161, 0.023462523332899828, 0.059550451881820676, 0.02535163155307142)
+Cluster Size: 10313
+Top 5 tokens:
+Token          Frequency
+eating         1529
+ice            1480
+cream          1258
+just           788
+chocolate      759
+======================
+
+====== Results for Cluster 7 ======
+Cluster Center: (0.007832675617522673, -0.02175264320024502, 0.4238502602846635, 0.2388544029473162, -0.20437641826257263)
+Cluster Size: 35041
+Top 5 tokens:
+Token          Frequency
+going          5873
+night          3949
+work           3577
+i'm            3361
+tomorrow       3277
+======================
+
+====== Results for Cluster 8 ======
+Cluster Center: (-0.044304119322454656, 0.0452574257484318, 0.022265433431692547, 0.0398635279276253, 0.00782332801955347)
+Cluster Size: 40497
+Top 5 tokens:
+Token          Frequency
+i'm            1338
+just           976
+it's           838
+like           639
+-              628
+======================
+
+====== Results for Cluster 9 ======
+Cluster Center: (-0.008696055787173897, -0.05993039165983708, 0.10668297415749943, 0.39778406784653947, 0.21118131213732058)
+Cluster Size: 24826
+Top 5 tokens:
+Token          Frequency
+new            3158
+just           2765
+got            1921
+3              1857
+day            1826
+======================
+
+====== Results for Cluster 10 ======
+Cluster Center: (-0.19533693103197397, 0.05285228981573988, 4.815335667545575E-4, 0.16743462042892868, 0.08665996865954403)
+Cluster Size: 68733
+Top 5 tokens:
+Token          Frequency
+just           11001
+-              6905
+like           6837
+got            4612
+it's           4341
+======================
+
+====== Results for Cluster 11 ======
+Cluster Center: (-0.6056790362779447, -0.16433743492672018, 0.22198074091517744, -0.7075604431683155, 0.1700852382795063)
+Cluster Size: 4148
+Top 5 tokens:
+Token          Frequency
+hurts          817
+tummy          598
+throat         500
+headache       492
+sore           408
+======================
+
+====== Results for Cluster 12 ======
+Cluster Center: (-0.09760334457906233, 0.10278840929849188, 0.13136225720356623, 0.28429539287361644, -0.26404062284506064)
+Cluster Size: 59256
+Top 5 tokens:
+Token          Frequency
+good           10919
+hope           5132
+i'm            4765
+love           4185
+great          4159
+======================
+
+====== Results for Cluster 13 ======
+Cluster Center: (-0.07958757213486582, 0.22390762916844484, -0.06348942197929373, 0.23551432200476946, 0.12508427322196053)
+Cluster Size: 53761
+Top 5 tokens:
+Token          Frequency
+just           6875
+twitter        5004
+don't          4011
+know           3359
+i'm            3291
+======================
+
+====== Results for Cluster 14 ======
+Cluster Center: (-0.1693920008474488, -0.08842172557351011, 0.14939106607341548, 0.2568200054134713, 0.02437023887320112)
+Cluster Size: 53728
+Top 5 tokens:
+Token          Frequency
+just           7007
+-              4983
+got            4775
+watching       4217
+&amp;          4216
+======================
+
+====== Results for Cluster 15 ======
+Cluster Center: (0.018912438501775153, -0.06367701441690346, -0.010979278976990109, 0.8140834464911615, -0.2396827373830581)
+Cluster Size: 7929
+Top 5 tokens:
+Token          Frequency
+mtv            1582
+movie          1516
+new            1452
+awards         1242
+day            1109
+======================
+
+====== Results for Cluster 16 ======
+Cluster Center: (-0.041754626798765425, 0.26237751416835337, 0.08064972990227609, 0.1072624766824314, 0.008300243456187158)
+Cluster Size: 63228
+Top 5 tokens:
+Token          Frequency
+i'm            10832
+don't          6274
+know           6199
+u              5958
+im             5155
+======================
+
+====== Results for Cluster 17 ======
+Cluster Center: (0.3712388934903512, -0.05380116238930701, -0.4525523813694394, 0.9533394048226851, 0.5187453843556298)
+Cluster Size: 2577
+Top 5 tokens:
+Token          Frequency
+followers      647
+add            503
+using          302
+train          291
+pay            257
+======================
+
+====== Results for Cluster 18 ======
+Cluster Center: (-0.10358704267982399, 0.056327976020656687, 0.22652795607405532, 0.33999335704923633, -0.5171037585894799)
+Cluster Size: 21368
+Top 5 tokens:
+Token          Frequency
+good           7691
+happy          4321
+morning        3244
+hope           2299
+night          2205
+======================
+
+====== Results for Cluster 19 ======
+Cluster Center: (0.06023083013816251, 0.0332052521836542, 0.5416348969469723, -0.039373082345873514, 0.018293073725099532)
+Cluster Size: 17165
+Top 5 tokens:
+Token          Frequency
+sleep          1894
+tired          1842
+i'm            1753
+work           1742
+going          1684
+======================
+
+====== Results for Cluster 20 ======
+Cluster Center: (-0.07841070069486987, 0.4226939592539584, -0.07349700336654735, 0.0622220948226916, 0.06702807696468897)
+Cluster Size: 33529
+Top 5 tokens:
+Token          Frequency
+know           8055
+don't          7956
+dont           3133
+u              3036
+want           2878
+======================
+
+====== Results for Cluster 21 ======
+Cluster Center: (-0.12833983952853087, 0.06533421165759037, -0.025926814598136134, 0.40064324063579215, -0.05325114101431191)
+Cluster Size: 52078
+Top 5 tokens:
+Token          Frequency
+new            7861
+-              6907
+just           5251
+love           4080
+day            2578
+======================
+
+====== Results for Cluster 22 ======
+Cluster Center: (-0.12677617958391418, -0.017090587237339184, 0.25134879706503216, 0.05568609467264811, 0.062460506809805916)
+Cluster Size: 50718
+Top 5 tokens:
+Token          Frequency
+i'm            6351
+just           5916
+going          3826
+got            3627
+work           3112
+======================
+
+====== Results for Cluster 23 ======
+Cluster Center: (-0.3341443382965476, -0.007395409433236935, 0.19726871153618727, -0.25328047373880497, 0.08592394354022362)
+Cluster Size: 17176
+Top 5 tokens:
+Token          Frequency
+hurts          1705
+feel           1194
+i'm            1000
+sore           969
+throat         924
+======================
+
+====== Results for Cluster 24 ======
+Cluster Center: (-0.15755426320498475, -0.18952990109071038, 0.455286535637074, 0.3504640668250419, -0.6648959093581699)
+Cluster Size: 10071
+Top 5 tokens:
+Token          Frequency
+good           3317
+morning        2971
+happy          1843
+day            1305
+night          905
+======================
+
+====== Results for Cluster 25 ======
+Cluster Center: (0.019291603658236473, -0.07717450948237996, 0.35934290146975817, 0.22351294306036937, 0.0731483511170453)
+Cluster Size: 44662
+Top 5 tokens:
+Token          Frequency
+work           5619
+going          4982
+just           4172
+2              4022
+day            3706
+======================
+
+====== Results for Cluster 26 ======
+Cluster Center: (-0.1216227000612185, 0.31146900667885385, -0.03112054615948777, 0.16639720531532082, -0.1999835243219932)
+Cluster Size: 54342
+Top 5 tokens:
+Token          Frequency
+i'm            5229
+lol            4452
+oh             4059
+u              3729
+sorry          3727
+======================
+
+====== Results for Cluster 27 ======
+Cluster Center: (-4.780895097045069, 0.06739086901133344, -0.20591625923635762, 1.034988482648007, -3.44168973665831)
+Cluster Size: 50
+Top 5 tokens:
+Token          Frequency
+#seb-day       475
+help           2
+need           2
+hey,           1
+mal            1
+======================
+
+====== Results for Cluster 28 ======
+Cluster Center: (0.014385874417867445, 0.14252027097495504, 0.2741596581962943, 0.1195728946964692, -0.04061012497155776)
+Cluster Size: 53107
+Top 5 tokens:
+Token          Frequency
+i'm            10464
+im             6657
+going          6051
+sleep          5053
+work           4601
+======================
+
+====== Results for Cluster 29 ======
+Cluster Center: (-0.16059596133931725, 0.6118894475117684, -1.425744315419017, 1.3229869892464996, -1.6392648230755786)
+Cluster Size: 449
+Top 5 tokens:
+Token          Frequency
+???            407
+??             386
+????           382
+?????          344
+??????         281
+======================
+
+====== Results for Cluster 30 ======
+Cluster Center: (-0.3514076296586458, -0.06762854671527092, 0.019340760863198907, 0.18292914562060394, -0.08032210498647682)
+Cluster Size: 30137
+Top 5 tokens:
+Token          Frequency
+-              3495
+like           3203
+just           2204
+good           2164
+love           1828
+======================
+
+====== Results for Cluster 31 ======
+Cluster Center: (-0.19804668104437595, 0.10185218319321489, 0.13338689923236907, 0.04238838528469547, -0.08720713212162369)
+Cluster Size: 44488
+Top 5 tokens:
+Token          Frequency
+i'm            6424
+feel           4798
+like           4320
+it's           3932
+good           3563
+======================
+
+====== Results for Cluster 32 ======
+Cluster Center: (0.1623929749237404, -0.16729611541756562, 0.6417527066208902, 0.26139732393272114, -0.012903063178939762)
+Cluster Size: 18443
+Top 5 tokens:
+Token          Frequency
+work           3566
+going          2282
+ready          2184
+day            1698
+home           1584
+======================
+
+====== Results for Cluster 33 ======
+Cluster Center: (-0.054354409706295, 0.08258609579554614, 0.12176122783581485, 0.19393585627343515, 0.11738412234869755)
+Cluster Size: 65640
+Top 5 tokens:
+Token          Frequency
+just           8920
+i'm            7651
+got            5303
+2              4188
+need           3539
+======================
+
+====== Results for Cluster 34 ======
+Cluster Center: (-0.24202197882042886, -0.2708996862986735, 0.3951096440472516, 0.12712164554080368, -0.06532908985348602)
+Cluster Size: 21589
+Top 5 tokens:
+Token          Frequency
+sun            1468
+going          1392
+today          1225
+home           1188
+day            993
+======================
+
+====== Results for Cluster 35 ======
+Cluster Center: (-0.31481311060942085, -0.11942144918001871, 0.08681618677167272, 0.0467787973395078, 0.15615476208278858)
+Cluster Size: 36068
+Top 5 tokens:
+Token          Frequency
+just           5031
+got            2590
+like           2073
+i'm            1562
+&amp;          1479
+======================
+
+====== Results for Cluster 36 ======
+Cluster Center: (-0.18111674043088535, 0.21443547106739594, -0.05813689213839992, 0.14530467286779844, -0.04547291409137323)
+Cluster Size: 75795
+Top 5 tokens:
+Token          Frequency
+like           10800
+just           7616
+i'm            5311
+really         4710
+that's         4685
+======================
+
+====== Results for Cluster 37 ======
+Cluster Center: (-0.08496993409906914, -0.17147168608262034, 0.29096550024861423, 0.4407301080928084, -0.21907690817755177)
+Cluster Size: 25307
+Top 5 tokens:
+Token          Frequency
+day            9198
+looking        2654
+forward        2371
+today          2365
+good           2231
+======================
+
+====== Results for Cluster 38 ======
+Cluster Center: (-0.05874626049191544, 0.27352986174188804, -0.0049107499799065394, 0.3945505571206373, -0.36849479307541)
+Cluster Size: 34790
+Top 5 tokens:
+Token          Frequency
+love           5252
+miss           3244
+x              3214
+u              3067
+hope           2818
+======================
+
+====== Results for Cluster 39 ======
+Cluster Center: (-0.17868372671236252, 0.17261918308110935, 0.03579987114942259, -0.01620161646838974, 0.1099084271018006)
+Cluster Size: 46050
+Top 5 tokens:
+Token          Frequency
+just           4646
+don't          4602
+i'm            4489
+like           4445
+feel           3323
+======================
+
+====== Results for Cluster 40 ======
+Cluster Center: (-0.19119758548710547, 0.18878869087713981, -0.10256133232073157, 0.3123465354762411, -0.22640173592135485)
+Cluster Size: 51820
+Top 5 tokens:
+Token          Frequency
+love           9680
+thanks         7634
+-              5980
+like           3364
+thank          2980
+======================
+
+====== Results for Cluster 41 ======
+Cluster Center: (0.16096951654843963, 0.013453739729546523, 0.290099452804277, 0.4532229817121319, -0.08842837312324812)
+Cluster Size: 20055
+Top 5 tokens:
+Token          Frequency
+day            5383
+wait           4875
+can't          4414
+till           1698
+2              1654
+======================
+
+====== Results for Cluster 42 ======
+Cluster Center: (0.03982048418504319, 0.17647581722647818, -0.17709514738172039, 0.4845700554541292, 0.22646834768686827)
+Cluster Size: 15122
+Top 5 tokens:
+Token          Frequency
+twitter        1939
+new            1831
+add            1449
+followers      1344
+using          1343
+======================
+
+====== Results for Cluster 43 ======
+Cluster Center: (-0.12256432096082137, 0.11150526607150103, 0.05356291106181454, 0.2069820191564285, -0.0871856260874938)
+Cluster Size: 100547
+Top 5 tokens:
+Token          Frequency
+i'm            10687
+just           9200
+good           7065
+-              6986
+it's           6588
+======================
+
+====== Results for Cluster 44 ======
+Cluster Center: (-0.1587451766983566, 0.42243355195710375, -0.25265285965475315, 0.4620717390996588, -0.45816350835832387)
+Cluster Size: 18067
+Top 5 tokens:
+Token          Frequency
+thank          4237
+thanks         2953
+love           2278
+you!           1419
+hey            1291
+======================
